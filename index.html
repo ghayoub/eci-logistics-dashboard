@@ -475,7 +475,7 @@ function warnHtml(){return (META&&META.local&&PUB?'<div class="warnbox"><b>Previ
 
 function renderEmpty(err){
   $('#main').innerHTML='<div class="wrap">'+(err?'<div class="warnbox err" style="margin-top:16px">'+esc(err)+'</div>':'')+
-  '<div class="card empty"><h2>Load the logistics Excel</h2><p>Pick the KPI file (or drop it on this page). It is read in your browser only, nothing is uploaded anywhere.</p>'+
+  '<div class="card empty"><h2>Load the logistics Excel</h2><p>Pick the logistics Excel from OneDrive or your PC (or drop it on this page). It is read in your browser only – nothing is uploaded anywhere. This device then shows the last file loaded until you load a new one.</p>'+
   '<button class="btn" data-load>⤒ Load Excel file</button>'+
   '<div class="fmt"><b>Expected format</b><br>Sheet <code>KPIs</code>: KPI · Unit · Combine (Sum / Average / Last / Ratio) · Numerator KPI · Denominator KPI · Target · Better<br>Sheet <code>Data</code>: Date · Level (Day / Week / Month) · KPI · Value · Comment<br>Sheet <code>Targets</code> (optional): Date · Level (Day / Week / Month / Quarter) · KPI · Budget · Forecast<br><br><a href="'+TEMPLATE+'" download="ECI_Logistics_KPI_Data.xlsx" style="color:var(--eci);font-weight:600">Download the template (with example rows)</a></div></div></div>';
 }
@@ -484,7 +484,7 @@ function render(){
   if(!IDX){renderEmpty();return}
   fixKey();
   $('#dataDate').textContent=fmtDay(IDX.max)+' '+D(IDX.max).getUTCFullYear();
-  const fc=$('#fileChip'); fc.hidden=false; fc.innerHTML=(META.user&&!META.local)?esc(META.user)+' · <a href="#" data-signout style="color:#fff">Sign out</a>':(!META.local&&META.file==='data.xlsx')?'Demo <b>data.xlsx</b>':(META.local?'Preview <b>':'Updated <b>')+esc(META.local?META.file:META.at.replace('published ',''))+'</b>'+(!META.local&&META.file==='OneDrive (live)'?' · live':'');
+  const fc=$('#fileChip'); fc.hidden=false; fc.innerHTML=(META.user&&!META.local)?esc(META.user)+' · <a href="#" data-signout style="color:#fff">Sign out</a>':(!META.local&&META.file==='data.xlsx')?'Demo <b>data.xlsx</b>':(META.local?(PUB?'Preview <b>':'File <b>'):'Updated <b>')+esc(META.local?META.file:META.at.replace('published ',''))+'</b>'+(!META.local&&META.file==='OneDrive (live)'?' · live':'');
   if(S.view!=='overview'&&byName(S.view)) return renderKpi(byName(S.view));
   S.view='overview';
   const pk=prevKey(S.key);
@@ -681,17 +681,7 @@ function renderEmptyAuth(msg){
     try{await handleRedirect()}catch(err){renderSignIn(String(err.message||err));return}
     return loadGraph(false);
   }
-  // Demo mode (no sign-in configured): backup data.xlsx next to the page, else the last file loaded on this device
-  try{
-    const r=await fetch('data.xlsx?v='+Date.now(),{cache:'no-store'});
-    const ct=r.headers.get('content-type')||'';
-    if(r.ok&&!ct.includes('html')){
-      const res=parse(await readXlsx(await r.arrayBuffer()));
-      const lm=r.headers.get('last-modified');
-      PUB={defs:res.defs,rows:res.rows,tg:res.tg,warn:WARN.slice(),meta:{file:'data.xlsx',at:lm?'published '+stamp(new Date(lm)):'published data',local:false}};
-      showPublished(); return;
-    }
-  }catch(_){}
+  // Upload mode: show the last Excel loaded on this device; otherwise ask for the file
   try{const s=JSON.parse(localStorage.getItem(STORE)||'null');if(s&&s.ROWS&&s.ROWS.length){WARN=s.WARN||[];apply(s.DEF,s.ROWS,s.META,s.TG)}}catch(_){}
   render();
 })();

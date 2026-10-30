@@ -1,11 +1,14 @@
 # ECI Logistics dashboard
 
-Logistics KPI dashboard for ECI Morocco (P300). The page reads `data.xlsx` from OneDrive
-with each viewer's own ECI Microsoft sign-in – no data is stored on Netlify or GitHub.
+Logistics KPI dashboard for ECI Morocco (P300). Viewers click **Update data** and pick the
+logistics Excel (from OneDrive or their PC). The file is read in the browser only – no data is
+stored on Netlify or GitHub. Each device shows the last file loaded until a new one is picked.
+
+Microsoft sign-in (reading OneDrive automatically) is built in but inactive: it needs an Entra
+app registration from IT (see below). Until `clientId`/`tenantId` are set, the page stays in upload mode.
 
 ## Files
 - `index.html` – the dashboard (sign-in settings in the `CFG` block at the top of the script)
-- `data.xlsx` – demo data, used only until sign-in is configured
 - `excel/` – Excel template and test files
 
 ## Sign-in settings (`CFG` in index.html)
